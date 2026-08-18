@@ -28,7 +28,9 @@ const upstream = join(root, 'upstream')
 const desktop = join(root, 'desktop')
 for (const dir of [upstream, desktop]) {
   mkdirSync(dir)
-  await git('git init -q', dir)
+  // Pin the default branch to `main` so `rsi_perceive` (which defaults to
+  // `branch: main`) resolves regardless of the host's `init.defaultBranch`.
+  await git('git init -q -b main', dir)
   await git('git config user.email t@t && git config user.name t', dir)
 }
 writeFileSync(join(upstream, 'feature.txt'), 'upstream change\n')
