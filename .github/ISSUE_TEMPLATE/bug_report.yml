@@ -1,0 +1,26 @@
+name: Bug report
+description: Something is broken
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What did you run, what did you expect, what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: Minimal steps or the exact `dsh` command / tool call that triggers it.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The dsh version and this repo's ref/commit.
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Relevant output, redacting any secrets or keys.

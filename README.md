@@ -1,5 +1,7 @@
 # deepseek-desk-rsi
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
+
 **AI for AI**: a [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (DSH) plugin that makes a *downstream* app keep itself in sync with the fast-moving *upstream* harness — using DSH itself as the worker. DSH maintains DSH.
 
 DeepSeek Harness is in `0.1.x-rc` and its authors promise breaking changes. A desktop shell that pins one rc version rots within days. Instead of a human chasing upstream, this bundle gives the agent a bounded, self-correcting loop over five primitives.

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: DeepSeek Harness Discussions
+    url: https://github.com/deepseek-ai/deepseek-harness/discussions
+    about: Ask questions and share ideas about the harness and its plugin ecosystem
+  - name: Security advisory
+    url: https://github.com/deepseek-releated/deepseek-desk-rsi/security/advisories/new
+    about: Report a security vulnerability privately
