@@ -7,7 +7,7 @@ DeepSeek Harness is in `0.1.x-rc` and its authors promise breaking changes. A de
 ## The loop
 
 ```
-perceive  →  integrate  →  verify  →  repair (bounded)  →  propose
+perceive  →  integrate  →  verify  →  parity  →  repair (bounded)  →  propose
 ```
 
 | Stage | Who | How |
@@ -15,10 +15,11 @@ perceive  →  integrate  →  verify  →  repair (bounded)  →  propose
 | perceive | tool `rsi_perceive` | fetch upstream, diff commit log + stat since last sync |
 | integrate | agent (existing tools) | apply relevant harness changes to the app's glue with `bash` / `edit` / `subagent` / `workflow` |
 | verify | tool `rsi_verify` | the **hard fitness function**: `cargo build --locked && cargo test` + smoke, `ok` only on exit 0 |
-| repair | agent + `rsi_checkpoint` / `rsi_rollback` | checkpoint before edits (Memento), roll back and retry after a failed verify |
+| parity | tool `rsi_parity` | the **identical-surface gate**: HTTP endpoints answer and every required plugin in `parity.json` is still present |
+| repair | agent + `rsi_checkpoint` / `rsi_rollback` | checkpoint before edits (Memento), roll back and retry after a failed verify/parity |
 | propose | tool `rsi_propose` | commit, push a branch, open a PR via `gh` — the PR is the human gate; the loop never merges |
 
-The design constraint that makes RSI tractable here: **verify has a hard, automatable reward signal** ("does it build and pass"), unlike vague "get smarter" objectives.
+The design constraint that makes RSI tractable here: **verify + parity have hard, automatable reward signals** ("does it build and pass", "is every original capability still present"), unlike vague "get smarter" objectives.
 
 ## Design principles
 
@@ -40,8 +41,17 @@ The `profile/` directory is a starting headless profile; copy it into `$DSH_HOME
 - `rsi_perceive` — diff upstream since a base ref.
 - `rsi_checkpoint` — commit a labeled snapshot (Memento capture).
 - `rsi_rollback` — `git reset --hard` back to a checkpoint (Memento restore).
-- `rsi_verify` — run the fitness command; the loop's truth signal.
+- `rsi_verify` — run the fitness command; the build/test truth signal.
+- `rsi_parity` — check HTTP endpoints + required plugins against `parity.json`; the 1:1 feature-parity gate.
 - `rsi_propose` — open a PR via `gh`; the human review gate.
+
+## Parity contract
+
+`parity.json` lists every plugin in the official `dsh-base` + `dsh-web-app` bundles (128 plugins) plus the host endpoint. `rsi_parity` fails if any name goes missing after a sync — the machine-readable "identical surface" check. Regenerate it from the official bundles whenever upstream adds/renames a plugin:
+
+```sh
+node scripts/gen-parity.mjs /path/to/deepseek-harness
+```
 
 ## Verify locally
 

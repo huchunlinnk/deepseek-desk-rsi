@@ -1,4 +1,4 @@
-// Smoke test: verifies the bundle loads and registers all five rsi_* tools.
+// Smoke test: verifies the bundle loads and registers all six rsi_* tools.
 //
 // Requires the @deepseek-ai/cordis and @deepseek-ai/dsh-tools packages to be
 // resolvable (they are provided by a DSH profile install, or symlink a DSH
@@ -17,7 +17,7 @@ const fakeCtx = {
 
 apply(fakeCtx)
 
-const expected = ['rsi_perceive', 'rsi_checkpoint', 'rsi_rollback', 'rsi_verify', 'rsi_propose']
+const expected = ['rsi_perceive', 'rsi_checkpoint', 'rsi_rollback', 'rsi_verify', 'rsi_parity', 'rsi_propose']
 const actual = registered.map((tool) => tool.name)
 
 if (name !== 'dsh-desk-rsi') throw new Error(`bad plugin name: ${name}`)
