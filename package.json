@@ -1,0 +1,36 @@
+{
+  "name": "dsh-desk-rsi",
+  "version": "0.1.0",
+  "description": "Recursive Self-Improvement (RSI) engine for DeepSeek Harness: a bounded perceive → integrate → verify → repair → propose loop that keeps a downstream desktop app in sync with the fast-moving upstream harness. AI for AI — DSH maintains DSH.",
+  "type": "module",
+  "main": "index.js",
+  "files": [
+    "index.js",
+    "tools",
+    "lib",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "scripts": {
+    "smoke": "node scripts/smoke.js"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "*",
+    "@deepseek-ai/dsh-tools": "*"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "rsi",
+    "recursive-self-improvement",
+    "self-evolution",
+    "agent"
+  ],
+  "license": "MIT"
+}

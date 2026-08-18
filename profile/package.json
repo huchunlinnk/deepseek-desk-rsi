@@ -1,0 +1,16 @@
+{
+  "name": "dsh-profile-rsi",
+  "private": true,
+  "description": "Headless profile that composes the RSI engine over the DSH base.",
+  "dependencies": {
+    "dsh-desk-rsi": "github:YOUR_ORG/deepseek-desk-rsi#main"
+  },
+  "dsh": {
+    "profile": {
+      "bundles": [
+        "@deepseek-ai/dsh-base",
+        "dsh-desk-rsi"
+      ]
+    }
+  }
+}

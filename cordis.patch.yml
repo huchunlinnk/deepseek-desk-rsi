@@ -1,0 +1,9 @@
+# deepseek-desk-rsi bundle layer.
+#
+# Mounts the single RSI engine plugin, which registers the rsi_* tools. The
+# agent then orchestrates the sync loop with those tools plus its ordinary
+# bash / edit / grep / subagent / workflow tools — the RSI bundle only adds the
+# primitives that plain tooling cannot express.
+- insert:
+    - id: rsi-engine
+      name: dsh-desk-rsi

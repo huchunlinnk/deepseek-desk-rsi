@@ -1,0 +1,3 @@
+# Profile-level overrides applied AFTER every bundle layer. Keep empty until the
+# deployment needs to tune a row (e.g. point rsi_verify at the desktop repo cwd).
+[]
