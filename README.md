@@ -59,7 +59,8 @@ node scripts/gen-parity.mjs /path/to/deepseek-harness
 mkdir -p node_modules/@deepseek-ai
 ln -s /path/to/deepseek-harness/vendor/cordis node_modules/@deepseek-ai/cordis
 ln -s /path/to/deepseek-harness/packages/core/tools node_modules/@deepseek-ai/dsh-tools
-node scripts/smoke.js
+node scripts/smoke.js      # load + register all tools and the loop prompt
+node scripts/e2e-loop.mjs  # full perceive → checkpoint → rollback → verify → parity on real git
 ```
 
 ## License

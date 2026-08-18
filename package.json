@@ -13,7 +13,9 @@
     "README.md"
   ],
   "scripts": {
-    "smoke": "node scripts/smoke.js"
+    "smoke": "node scripts/smoke.js",
+    "e2e": "node scripts/e2e-loop.mjs",
+    "test": "node scripts/smoke.js && node scripts/e2e-loop.mjs"
   },
   "dsh": {
     "bundle": {

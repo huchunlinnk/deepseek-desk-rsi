@@ -26,5 +26,8 @@ jobs:
           ln -s "$PWD/dsh-checkout/vendor/cordis" node_modules/@deepseek-ai/cordis
           ln -s "$PWD/dsh-checkout/packages/core/tools" node_modules/@deepseek-ai/dsh-tools
 
-      - name: Smoke test
+      - name: Smoke test (load + register 6 tools + prompt section)
         run: node scripts/smoke.js
+
+      - name: End-to-end loop test (perceive → checkpoint → rollback → verify → parity)
+        run: node scripts/e2e-loop.mjs
