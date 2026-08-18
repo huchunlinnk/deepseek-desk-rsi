@@ -6,6 +6,13 @@
 
 DeepSeek Harness is in `0.1.x-rc` and its authors promise breaking changes. A desktop shell that pins one rc version rots within days. Instead of a human chasing upstream, this bundle gives the agent a bounded, self-correcting loop over five primitives.
 
+## Why — the biggest advantages
+
+1. **AI for AI, genuinely.** The worker is DeepSeek Harness itself: it diffs upstream, edits the integration glue, builds, tests, rolls back, and opens a PR — no human in the loop except the final merge.
+2. **"一模一样" is machine-checked, not a promise.** `rsi_parity` enforces a 128-plugin contract (`parity.json`, generated from the official bundles). Any upstream add/rename/remove surfaces as a hard failure.
+3. **Evolution that cannot run away.** Bounded repair (max 3 rounds), Memento checkpoints (`rsi_checkpoint`/`rsi_rollback`), and a PR gate — the loop proposes, a human merges.
+4. **Zero-build install.** Plain ESM + JSDoc, no `prepare` script: `dsh plugin add github:huchunlinnk/deepseek-desk-rsi#main` just works.
+
 ## The loop
 
 ```
