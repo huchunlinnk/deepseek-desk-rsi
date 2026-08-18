@@ -1,14 +1,15 @@
 import { defineTool } from '@deepseek-ai/dsh-tools'
 import { run } from '../lib/exec.js'
 
-const DEFAULT_COMMAND = 'cargo build --locked && cargo test'
+const DEFAULT_COMMAND = 'cargo build --locked && cargo test && bash scripts/smoke-web.sh'
 const DEFAULT_TIMEOUT_MS = 600_000
 
 const DESCRIPTION = [
-  'Run the hard fitness function: build and test the desktop repo, plus a',
-  'headless smoke run. Returns ok=true only if the whole command exits 0. This',
-  'single, automatable signal drives the repair loop — if it fails, roll back',
-  'to the last checkpoint and retry.',
+  'Run the hard fitness function: build the desktop, run its tests, and smoke',
+  'that the web surface serves (scripts/smoke-web.sh). Returns ok=true only if',
+  'the whole command exits 0. This signal drives the repair loop — if it fails,',
+  'roll back to the last checkpoint and retry. Pair with rsi_parity for the',
+  'full-surface gate.',
 ].join(' ')
 
 /**

@@ -4,12 +4,13 @@ import { registerRollback } from './tools/rollback.js'
 import { registerVerify } from './tools/verify.js'
 import { registerParity } from './tools/parity.js'
 import { registerPropose } from './tools/propose.js'
+import { registerLoopPrompt } from './prompt.js'
 
 /** Cordis plugin identity, consumed by the DSH loader. */
 export const name = 'dsh-desk-rsi'
 
 /** Services this plugin waits for before applying. */
-export const inject = ['tools']
+export const inject = ['tools', 'systemPrompt']
 
 /**
  * Register the RSI engine's six tools. The loop itself is orchestrated by the
@@ -25,4 +26,5 @@ export function apply(ctx) {
   registerVerify(ctx)
   registerParity(ctx)
   registerPropose(ctx)
+  registerLoopPrompt(ctx)
 }

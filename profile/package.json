@@ -9,6 +9,7 @@
     "profile": {
       "bundles": [
         "@deepseek-ai/dsh-base",
+        "@deepseek-ai/dsh-headless",
         "dsh-desk-rsi"
       ]
     }

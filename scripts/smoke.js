@@ -7,10 +7,18 @@ import { apply, name } from '../index.js'
 
 /** @type {Array<{ name: string, description: string, execute: Function }>} */
 const registered = []
+/** @type {Array<{ name: string, order: number, text: string }>} */
+const sections = []
 const fakeCtx = {
   tools: {
     register(definition) {
       registered.push(definition)
+    },
+  },
+  systemPrompt: {
+    section(section) {
+      sections.push(section)
+      return () => {}
     },
   },
 }
@@ -29,5 +37,8 @@ for (const tool of expected) {
     throw new Error(`tool ${tool} has no description`)
   }
 }
+if (!sections.some((section) => section.name === 'rsi:loop')) {
+  throw new Error('missing rsi:loop prompt section')
+}
 
-console.log(`[smoke] OK: ${name} registered ${actual.length} tools: ${actual.join(', ')}`)
+console.log(`[smoke] OK: ${name} registered ${actual.length} tools: ${actual.join(', ')} (+ ${sections.length} prompt section)`)

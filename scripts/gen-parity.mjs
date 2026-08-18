@@ -28,10 +28,9 @@ for (const src of [base, web]) {
 const manifest = {
   profile: 'web',
   hostUrl: 'http://127.0.0.1:3080',
-  endpoints: [{ url: 'http://127.0.0.1:3080/', status: 200 }],
   dumpCommand: 'npx @deepseek-ai/dsh --profile web --dump-config',
   requiredPlugins: [...names].sort(),
-  note: 'requiredPlugins is the union of the dsh-base and dsh-web-app bundle rows — the complete original DeepSeek Harness feature surface. After an RSI sync, a missing name means upstream removed or renamed a capability and the desktop no longer has 1:1 parity.',
+  note: 'requiredPlugins is the union of the dsh-base and dsh-web-app bundle rows — the complete original DeepSeek Harness feature surface. After an RSI sync, a missing name means upstream removed or renamed a capability and the desktop no longer has 1:1 parity. hostUrl is the serving target checked by the desktop\'s scripts/smoke-web.sh, not by rsi_parity.',
 }
 
 const out = process.argv[3] ?? 'parity.json'

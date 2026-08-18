@@ -6,6 +6,7 @@
   "main": "index.js",
   "files": [
     "index.js",
+    "prompt.js",
     "tools",
     "lib",
     "cordis.patch.yml",

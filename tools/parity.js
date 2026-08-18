@@ -4,29 +4,30 @@ import { run } from '../lib/exec.js'
 
 const DEFAULT_MANIFEST = 'parity.json'
 const DEFAULT_DUMP_COMMAND = 'npx @deepseek-ai/dsh --profile web --dump-config'
-const HTTP_TIMEOUT_MS = 5000
 
 const DESCRIPTION = [
   'Verify 1:1 feature parity between the original DeepSeek Harness and the',
-  'native desktop app, against a parity.json manifest. Checks (1) every HTTP',
-  'endpoint answers with the expected status, and (2) the composed profile',
-  'dump still contains every required plugin name. This is the "identical',
-  'surface" gate: ok=true only when nothing is missing.',
+  'native desktop app: run the composed-profile dump and confirm every required',
+  'plugin name from parity.json is still present (exact-name match). This is the',
+  '"identical surface" gate — ok=true only when nothing is missing. The web',
+  'endpoint smoke lives in rsi_verify via scripts/smoke-web.sh, not here.',
 ].join(' ')
 
 /**
- * @param {string} url endpoint URL.
- * @param {number} expectedStatus HTTP status that signals ready.
- * @returns {Promise<{ ok: boolean, detail: string }>}
+ * Extract exact plugin `name:` tokens from a `--dump-config` render, handling
+ * single-, double-, and unquoted scalars plus subpaths like
+ * `@deepseek-ai/dsh-tool-subagent-control/list-agents`. Exact-set membership
+ * (not substring) so `dsh-llm` does not falsely match `dsh-llm-retry`.
+ *
+ * @param {string} text the config-dump output.
+ * @returns {Set<string>} parsed plugin names.
  */
-async function httpOk(url, expectedStatus) {
-  try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(HTTP_TIMEOUT_MS) })
-    return { ok: res.status === expectedStatus, detail: `status ${res.status}` }
-  } catch (err) {
-    const e = /** @type {{ cause?: unknown, message?: string }} */ (err)
-    return { ok: false, detail: String(e.cause ?? e.message ?? err) }
+function extractPluginNames(text) {
+  const names = new Set()
+  for (const match of text.matchAll(/name:\s*['"]?([^'"\s]+)/g)) {
+    names.add(match[1])
   }
+  return names
 }
 
 /**
@@ -54,42 +55,26 @@ export function registerParity(ctx) {
         return JSON.stringify({ ok: false, error: `cannot read manifest ${manifestPath}: ${e.message}` }, null, 2)
       }
 
-      /** @type {Array<{ kind: string, name: string, ok: boolean, detail?: string }>} */
-      const checks = []
-
-      for (const ep of manifest.endpoints ?? []) {
-        const { ok, detail } = await httpOk(ep.url, ep.status ?? 200)
-        checks.push({ kind: 'endpoint', name: ep.url, ok, detail })
-      }
-
       const dump = await run(args.dumpCommand ?? DEFAULT_DUMP_COMMAND)
       if (!dump.ok) {
-        checks.push({ kind: 'composition', name: 'dump-config', ok: false, detail: dump.stderr.slice(-2000) })
-      } else {
-        const required = manifest.requiredPlugins ?? []
-        let missing = 0
-        for (const plugin of required) {
-          if (!dump.stdout.includes(plugin)) {
-            missing += 1
-            checks.push({ kind: 'plugin', name: plugin, ok: false })
-          }
-        }
-        checks.push({
-          kind: 'composition',
-          name: 'dump-config',
-          ok: true,
-          detail: `${required.length - missing}/${required.length} required plugins present`,
-        })
+        return JSON.stringify({
+          ok: false,
+          profile: manifest.profile,
+          error: `dump-config failed: ${dump.stderr.slice(-2000)}`,
+        }, null, 2)
       }
 
-      const failed = checks.filter((check) => !check.ok)
+      const present = extractPluginNames(dump.stdout)
+      const required = manifest.requiredPlugins ?? []
+      const missing = required.filter((plugin) => !present.has(plugin))
+
       return JSON.stringify({
-        ok: failed.length === 0,
+        ok: missing.length === 0,
         profile: manifest.profile,
-        total: checks.length,
-        passed: checks.length - failed.length,
-        failed: failed.length,
-        failures: failed.map((check) => ({ kind: check.kind, name: check.name, detail: check.detail })),
+        required: required.length,
+        present: present.size,
+        missing: missing.length,
+        missingNames: missing,
       }, null, 2)
     },
   }))
