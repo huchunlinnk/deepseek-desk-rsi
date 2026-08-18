@@ -7,7 +7,13 @@ All notable changes to this project are documented here. The format follows [Kee
 ### Added
 
 - Six RSI tools: `rsi_perceive`, `rsi_checkpoint`, `rsi_rollback`, `rsi_verify`, `rsi_parity`, `rsi_propose`.
-- Loop-discipline system-prompt section (`rsi:loop`) enforcing bounded repair.
-- `parity.json` contract (128 upstream plugins) + `scripts/gen-parity.mjs` generator + `rsi_parity` exact-set check.
-- Headless profile (`base` + `headless` + `dsh-desk-rsi`).
-- Smoke and end-to-end loop tests; CI workflow.
+- Loop-discipline system-prompt section (`rsi:loop`) that enforces the bounded `perceive → integrate → verify → parity → repair → propose` order.
+- `parity.json` (the 128-plugin upstream contract) plus `scripts/gen-parity.mjs` to regenerate it from the official `dsh-base` + `dsh-web-app` bundles.
+- Headless profile (`dsh-base` + `dsh-headless` + `dsh-desk-rsi`).
+- Smoke test (register all tools + the prompt) and end-to-end loop test (real-git `perceive → checkpoint → rollback → verify → parity`).
+- CI workflow that installs the prebuilt `@deepseek-ai/dsh-tools` and runs both tests.
+- English and Chinese READMEs.
+
+### Fixed
+
+- `rsi_parity` exact-name matching: a substring check previously let `dsh-llm` falsely match `dsh-llm-retry`.

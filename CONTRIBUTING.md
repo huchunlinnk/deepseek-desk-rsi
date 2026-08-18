@@ -5,11 +5,9 @@ Thanks for helping build the RSI engine. This is a DeepSeek Harness (DSH) plugin
 ## Development
 
 ```sh
-# 1. Clone and wire the DSH peer types for local tests
-git clone <this-repo>
-mkdir -p node_modules/@deepseek-ai
-ln -s /path/to/deepseek-harness/vendor/cordis node_modules/@deepseek-ai/cordis
-ln -s /path/to/deepseek-harness/packages/core/tools node_modules/@deepseek-ai/dsh-tools
+# 1. Clone and install the prebuilt tool registry (powers the tests)
+git clone https://github.com/huchunlinnk/deepseek-desk-rsi.git
+npm install --no-save --no-package-lock @deepseek-ai/dsh-tools
 
 # 2. Test
 npm test                 # smoke (register 6 tools + prompt) + e2e (real-git loop)
@@ -17,6 +15,8 @@ npm test                 # smoke (register 6 tools + prompt) + e2e (real-git loo
 # 3. Regenerate the parity contract after an upstream harness change
 node scripts/gen-parity.mjs /path/to/deepseek-harness
 ```
+
+To develop against a locally built harness checkout instead of the published package, symlink its packages into `node_modules/@deepseek-ai/`.
 
 ## Conventions
 
