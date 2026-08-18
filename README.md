@@ -1,100 +1,102 @@
 # deepseek-desk-rsi
 
+[English](./README.en.md) | 中文
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
-A [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (DSH) plugin that makes a *downstream* app keep itself in sync with the fast-moving *upstream* harness — using DSH itself as the worker.
+一个 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（DSH）插件，让*下游*应用与高速演进的*上游* harness 保持同步——工人就是 DSH 自己。
 
-**AI for AI: DSH maintains DSH.**
+**AI for AI：DSH 维护 DSH。**
 
-## Why this exists
+## 为什么做这个
 
-DeepSeek Harness is in `0.1.x-rc` and ships breaking changes often. A desktop shell (or any downstream app) that pins one version rots within days. Chasing upstream by hand is a full-time job. This bundle hands that job to an agent — with hard, automatable success signals so the loop can't drift.
+DeepSeek Harness 目前是 `0.1.x-rc`，频繁出破坏性变更。一个锁死版本的桌面壳（或任何下游应用）几天就会腐坏。手工追上游是一份全职工作。这个 bundle 把这份工作交给 agent——并且给它**硬的、可自动化的成功信号**，让这个环不会跑偏。
 
-## Why — the biggest advantages
+## 为什么 —— 最大的优势
 
-1. **AI for AI, genuinely.** The worker is DeepSeek Harness itself: it diffs upstream, edits the integration glue, builds, tests, rolls back, and opens a PR — no human in the loop except the final merge.
-2. **"一模一样" is machine-checked, not a promise.** `rsi_parity` enforces a 128-plugin contract (`parity.json`, generated from the official `dsh-base` + `dsh-web-app` bundles). Any upstream add/rename/remove surfaces as a hard failure — exact-name matching, not substring.
-3. **Evolution that cannot run away.** Bounded repair (max 3 rounds), Memento checkpoints (`rsi_checkpoint` / `rsi_rollback`), and a PR gate — the loop proposes, a human merges.
-4. **Zero-build install.** Plain ESM + JSDoc, no `prepare` script: `dsh plugin add github:huchunlinnk/deepseek-desk-rsi#main` just works.
+1. **真正的 AI for AI。** 工人就是 DeepSeek Harness 自己：它对比上游 diff、改集成胶水、构建、测试、回滚、开 PR——除了最后 merge 那一下，全程无人。
+2. **"一模一样"是机器校验的，不是口头承诺。** `rsi_parity` 强制一个 128 插件契约（`parity.json`，从官方 `dsh-base` + `dsh-web-app` 两个 bundle 生成）。上游任何增删改名都会变成硬失败——精确名字匹配，不是子串。
+3. **不会失控的进化。** 有界修复（最多 3 轮）、Memento 检查点（`rsi_checkpoint` / `rsi_rollback`）、PR 闸门——环只提议，人来 merge。
+4. **零构建即装。** 纯 ESM + JSDoc，无 `prepare` 脚本：`dsh plugin add github:huchunlinnk/deepseek-desk-rsi#main` 直接可用。
 
-## The loop
+## 环路
 
 ```
-perceive  →  integrate  →  verify  →  parity  →  repair (bounded)  →  propose
+perceive  →  integrate  →  verify  →  parity  →  repair（有界）→  propose
 ```
 
-| Stage | Who | How |
+| 阶段 | 谁 | 怎么做 |
 |---|---|---|
-| perceive | tool `rsi_perceive` | fetch upstream, diff commit log + stat since last sync |
-| integrate | agent (existing tools) | apply the relevant harness changes to the app's glue with `bash` / `edit` / `subagent` / `workflow` |
-| verify | tool `rsi_verify` | the **hard fitness function**: `cargo build && cargo test && bash scripts/smoke-web.sh`, `ok` only on exit 0 |
-| parity | tool `rsi_parity` | the **identical-surface gate**: every required plugin in `parity.json` is still present |
-| repair | agent + `rsi_checkpoint` / `rsi_rollback` | checkpoint before edits (Memento), roll back and retry after a failed verify/parity |
-| propose | tool `rsi_propose` | commit, push a branch, open a PR via `gh` — the human gate |
+| perceive | 工具 `rsi_perceive` | fetch 上游，对比上次同步以来的 commit log + stat |
+| integrate | agent（现有工具） | 用 `bash` / `edit` / `subagent` / `workflow` 把相关 harness 变更应用进应用的胶水 |
+| verify | 工具 `rsi_verify` | **硬适应度函数**：`cargo build && cargo test && bash scripts/smoke-web.sh`，退出码 0 才算过 |
+| parity | 工具 `rsi_parity` | **同面门**：`parity.json` 里的每个必需插件都还在 |
+| repair | agent + `rsi_checkpoint` / `rsi_rollback` | 改动前先 checkpoint（Memento），verify/parity 失败后回滚重试 |
+| propose | 工具 `rsi_propose` | commit、推分支、用 `gh` 开 PR——人审闸门 |
 
-The loop discipline is enforced by a system-prompt section (`rsi:loop`) that the bundle injects, so the agent cannot silently skip a stage.
+环路纪律由一个 bundle 注入的 system-prompt 段（`rsi:loop`）强制执行，agent 无法偷偷跳过某个阶段。
 
-## Tools
+## 工具
 
-| Tool | Purpose | Design pattern |
+| 工具 | 作用 | 设计模式 |
 |---|---|---|
-| `rsi_perceive` | diff upstream since a base ref | — |
-| `rsi_checkpoint` | commit a labeled snapshot | Memento (capture) |
-| `rsi_rollback` | `git reset --hard` back to a checkpoint | Memento (restore) |
-| `rsi_verify` | run the build/test/serve fitness command | — |
-| `rsi_parity` | check `parity.json` against `--dump-config` (exact-set) | — |
-| `rsi_propose` | open a PR via `gh` | Command (review gate) |
+| `rsi_perceive` | 对比上游相对某个 base ref 的差异 | — |
+| `rsi_checkpoint` | 提交一个带标签的快照 | Memento（捕获） |
+| `rsi_rollback` | `git reset --hard` 回到某个检查点 | Memento（恢复） |
+| `rsi_verify` | 跑构建/测试/服务冒烟适应度命令 | — |
+| `rsi_parity` | 用 `--dump-config` 精确匹配校验 `parity.json` | — |
+| `rsi_propose` | 用 `gh` 开 PR | Command（人审闸门） |
 
-The five stages are a **Pipeline**; the whole loop is **bounded recursion** (max 3 repair rounds).
+五个阶段是一条 **Pipeline**；整个环是**有界递归**（最多 3 轮修复）。
 
-## Install
+## 安装
 
 ```sh
 dsh plugin --profile rsi add github:huchunlinnk/deepseek-desk-rsi#main
 dsh --profile rsi "Run the daily upstream sync: perceive, integrate, verify, parity, repair if needed, then propose a PR."
 ```
 
-The `profile/` directory is a starting headless profile (`dsh-base` + `dsh-headless` + `dsh-desk-rsi`). Copy it into `$DSH_HOME/profiles/rsi` and point it at your repo.
+`profile/` 目录是一个起始无头 profile（`dsh-base` + `dsh-headless` + `dsh-desk-rsi`）。把它复制进 `$DSH_HOME/profiles/rsi` 并指向你的仓库。
 
-## Parity contract
+## 对等契约
 
-`parity.json` lists every plugin in the official `dsh-base` + `dsh-web-app` bundles (128 plugins) plus the host endpoint. `rsi_parity` fails if any name goes missing after a sync. Regenerate it from the official bundles whenever upstream adds/renames a plugin:
+`parity.json` 列出了官方 `dsh-base` + `dsh-web-app` 两个 bundle 里的全部插件（128 个）加上宿主端点。同步后少了任何一个名字，`rsi_parity` 就会失败。上游增删改名插件后，从官方 bundle 重新生成：
 
 ```sh
 node scripts/gen-parity.mjs /path/to/deepseek-harness
 ```
 
-## Design principles
+## 设计原则
 
-- **First principles** — reuses the harness (`@deepseek-ai/dsh-tools`, `@deepseek-ai/cordis` are peer deps provided by DSH); never reimplements bash, git, or subagents.
-- **Occam's razor** — plain ESM JavaScript, zero build, zero `prepare`; a git install works out of the box.
-- **Design patterns** — Pipeline (stages), Memento (checkpoint/rollback), Command (PR gate), Strategy (the desktop's update policy), bounded recursion.
+- **第一性原则** —— 复用 harness（`@deepseek-ai/dsh-tools`、`@deepseek-ai/cordis` 是 DSH 提供的 peer 依赖）；绝不重写 bash、git 或子代理。
+- **奥卡姆剃刀** —— 纯 ESM JavaScript，零构建、零 `prepare`；git 安装开箱即用。
+- **设计模式** —— Pipeline（阶段）、Memento（检查点/回滚）、Command（PR 闸门）、Strategy（桌面端的更新策略）、有界递归。
 
-## Repository layout
+## 仓库结构
 
 ```
-index.js           single entry; registers the 6 tools + the loop prompt
-prompt.js          the rsi:loop system-prompt section (discipline)
-tools/             one tool per file
-lib/exec.js        bounded shell runner
-scripts/           smoke.js, e2e-loop.mjs, gen-parity.mjs
-profile/           starting headless profile
-parity.json        128-plugin contract
+index.js           单入口；注册 6 个工具 + 环路 prompt
+prompt.js          rsi:loop system-prompt 段（纪律）
+tools/             一个文件一个工具
+lib/exec.js        有界 shell 执行器
+scripts/           smoke.js、e2e-loop.mjs、gen-parity.mjs
+profile/           起始无头 profile
+parity.json        128 插件契约
 ```
 
-## Testing
+## 测试
 
 ```sh
-npm install --no-save --no-package-lock @deepseek-ai/dsh-tools   # prebuilt registry + cordis peer
-npm test   # smoke (register 6 tools + prompt) + e2e (real-git perceive→checkpoint→rollback→verify→parity)
+npm install --no-save --no-package-lock @deepseek-ai/dsh-tools   # 预构建的注册表 + cordis peer
+npm test   # smoke（注册 6 工具 + prompt）+ e2e（真实 git 跑 perceive→checkpoint→rollback→verify→parity）
 ```
 
-To develop against a locally built harness checkout instead, symlink its packages into `node_modules/@deepseek-ai/` (as the CI once did).
+若要对着本地已构建的 harness checkout 开发，可以改为把它的包 symlink 进 `node_modules/@deepseek-ai/`。
 
-## Security
+## 安全
 
-A running loop is a local user with shell access. Secrets never enter source; the PR is the gate; pin upstream to a commit you trust. See [`SECURITY.md`](./SECURITY.md).
+一个正在运行的环就是拥有 shell 权限的本地用户。密钥绝不进源码；PR 是闸门；把 upstream 钉到你信任的 commit。见 [`SECURITY.md`](./SECURITY.md)。
 
-## License
+## 许可证
 
 [MIT](./LICENSE)
