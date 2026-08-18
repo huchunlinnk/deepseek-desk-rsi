@@ -10,21 +10,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # A real DSH checkout provides the peer types/runtime for the smoke test.
-      - uses: actions/checkout@v4
-        with:
-          repository: deepseek-ai/deepseek-harness
-          path: dsh-checkout
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
 
-      - name: Wire DSH packages into node_modules
-        run: |
-          mkdir -p node_modules/@deepseek-ai
-          ln -s "$PWD/dsh-checkout/vendor/cordis" node_modules/@deepseek-ai/cordis
-          ln -s "$PWD/dsh-checkout/packages/core/tools" node_modules/@deepseek-ai/dsh-tools
+      # The published, prebuilt dsh-tools (and its cordis peer) powers the tests.
+      - name: Install the DSH tool registry
+        run: npm install --no-save --no-package-lock @deepseek-ai/dsh-tools
 
       - name: Smoke test (load + register 6 tools + prompt section)
         run: node scripts/smoke.js
