@@ -2,9 +2,9 @@
 
 Do these once before the first public release.
 
-## 1. Set the org
+## 1. Org
 
-Replace `YOUR_ORG` with your GitHub user or org in:
+This repo lives under `huchunlinnk`. If you fork it, replace `huchunlinnk` with your own user/org in:
 
 - `README.md` (install command)
 - `profile/package.json` (the `dsh-desk-rsi` dependency)

@@ -32,7 +32,7 @@ The design constraint that makes RSI tractable here: **verify + parity have hard
 ## Install
 
 ```sh
-dsh plugin --profile rsi add github:YOUR_ORG/deepseek-desk-rsi#main
+dsh plugin --profile rsi add github:huchunlinnk/deepseek-desk-rsi#main
 dsh --profile rsi "Run the daily upstream sync: perceive, integrate, verify, repair if needed, then propose a PR."
 ```
 
